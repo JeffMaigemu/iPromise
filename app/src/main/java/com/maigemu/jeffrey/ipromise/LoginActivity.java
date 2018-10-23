@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.Gravity;
 import android.view.View;
@@ -123,9 +124,13 @@ public class LoginActivity extends AppCompatActivity {
                                     checkUserExist();
                                     progressBar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
+                                        Log.d("message", "signInWithEmail:success");
+                                        checkUserExist();
+
 
                                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                         startActivity(intent);
+
                                         finish();
 
                                     } else {
@@ -135,6 +140,7 @@ public class LoginActivity extends AppCompatActivity {
                                             btnLogin.setEnabled(true);
                                             inputPassword.setError(getString(R.string.minimum_password));
                                         } else {
+                                            Log.w("message", "signInWithEmail:failure", task.getException());
                                             btnLogin.setEnabled(true);
                                             progressBar.setVisibility(View.GONE);
                                             Toast.makeText(LoginActivity.this, getString(R.string.auth_failed), Toast.LENGTH_LONG).show();
