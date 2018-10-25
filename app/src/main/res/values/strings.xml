@@ -56,4 +56,9 @@
     <string name="upload_details">Upload Information</string>
     <string name="action_search">Search</string>
     <string name="Logout">Logout</string>
+    <string name="btn_sign_up">Create an Account</string>
+    <string name="confirm_password">Confirm Passwrd</string>
+    <string name="setup_name_hint">Name</string>
+    <string name="save_settings">Save Account Settings</string>
+    <string name="setup_name">Name</string>
 </resources>
