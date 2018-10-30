@@ -58,7 +58,9 @@ public class SignupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                finish();
+                Intent loginIntent = new Intent(SignupActivity.this, MainActivity.class);
+                startActivity(loginIntent);
+
             }
         });
 
@@ -158,8 +160,8 @@ public class SignupActivity extends AppCompatActivity {
 
     private void sendToMain() {
 
-        Intent loginIntent = new Intent(SignupActivity.this, MainActivity.class);
-        startActivity(loginIntent);
+        Intent mainIntent = new Intent(SignupActivity.this, MainActivity.class);
+        startActivity(mainIntent);
         finish();
     }
 

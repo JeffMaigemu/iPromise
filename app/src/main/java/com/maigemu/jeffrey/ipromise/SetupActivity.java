@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -14,8 +15,16 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -27,15 +36,24 @@ public class SetupActivity extends AppCompatActivity {
     private Uri mainImageUri = null;
     private EditText setupName;
     private Button setupButton;
+    private StorageReference storageReference;
+    private FirebaseAuth firebaseAuth;
+    private ProgressBar setupProgress;
+    private FirebaseFirestore firebaseFirestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setup);
 
+        firebaseAuth = FirebaseAuth.getInstance();
+        storageReference = FirebaseStorage.getInstance().getReference();
+        firebaseFirestore = FirebaseFirestore.getInstance();
+
         setupImage = findViewById(R.id.setup_image);
         setupName = findViewById(R.id.setup_name);
         setupButton = findViewById(R.id.setup_button);
+        setupProgress = findViewById(R.id.setup_progress);
 
         setupButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -44,7 +62,32 @@ public class SetupActivity extends AppCompatActivity {
                 String username = setupName.getText().toString();
 
                 if (!TextUtils.isEmpty(username) && mainImageUri !=null){
-                    
+
+
+                    String user_id = firebaseAuth.getCurrentUser().getUid();
+                    setupProgress.setVisibility(View.VISIBLE);
+
+                    StorageReference image_path = storageReference.child("profile_image").child(user_id + "jpg");
+                    image_path.putFile(mainImageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+
+                            if (task.isSuccessful()){
+
+                                Uri download_uri = task.getResult().getUploadSessionUri();
+                                Toast.makeText(SetupActivity.this, "the image is uploaded", Toast.LENGTH_LONG).show();
+
+
+                            }else {
+                                String error = task.getException().getMessage();
+                                Toast.makeText(SetupActivity.this, "Error:" + error, Toast.LENGTH_LONG).show();
+
+                            }
+                            setupProgress.setVisibility(View.INVISIBLE);
+
+                        }
+                    });
+
                 }
             }
         });
@@ -62,16 +105,25 @@ public class SetupActivity extends AppCompatActivity {
                         ActivityCompat.requestPermissions(SetupActivity.this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
 
                     } else {
-                        CropImage.activity()
-                                .setGuidelines(CropImageView.Guidelines.ON)
-                                .setAspectRatio(1, 1)
-                                .start(SetupActivity.this);
+
+                        BringImagePicker();
                     }
+                }else {
+                    BringImagePicker();
+
                 }
 
             }
         });
 
+    }
+
+    private void BringImagePicker() {
+
+        CropImage.activity()
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .setAspectRatio(1, 1)
+                .start(SetupActivity.this);
     }
 
     @Override
