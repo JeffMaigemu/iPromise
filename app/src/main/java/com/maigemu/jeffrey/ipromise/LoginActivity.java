@@ -32,13 +32,13 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private ProgressBar progressBar;
     private Button btnSignup, btnLogin, btnReset;
-    private DatabaseReference mDatabaseUsers;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("users");
+
 
 
         //Get Firebase auth instance
@@ -121,11 +121,11 @@ public class LoginActivity extends AppCompatActivity {
 
                                 if (AppStatus.getInstance(LoginActivity.this).isOnline()) {
 
-                                    checkUserExist();
+
                                     progressBar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
                                         Log.d("message", "signInWithEmail:success");
-                                        checkUserExist();
+
 
 
                                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -162,38 +162,5 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void checkUserExist() {
-
-        if(auth.getCurrentUser() != null) {
-
-            final String user_id = auth.getCurrentUser().getUid();
-
-
-            mDatabaseUsers.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    if (!dataSnapshot.hasChild(user_id)) {
-
-                        Toast.makeText(LoginActivity.this,"This user does not exist", Toast.LENGTH_LONG).show();
-
-                        Intent setupIntent = new Intent(LoginActivity.this, SignupActivity.class);
-                        setupIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(setupIntent);
-
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-
-
-            });
-        }
-
-    }
 }
 
