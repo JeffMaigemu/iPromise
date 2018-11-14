@@ -67,29 +67,34 @@ public class SetupActivity extends AppCompatActivity {
         setContentView(R.layout.activity_setup);
 
         firebaseAuth = FirebaseAuth.getInstance();
+        currentUser = firebaseAuth.getCurrentUser();
         storageReference = FirebaseStorage.getInstance().getReference();
         firebaseFirestore = FirebaseFirestore.getInstance();
-        user_id = firebaseAuth.getCurrentUser().getUid();
+
 
         setupImage = findViewById(R.id.setup_image);
         setupName = findViewById(R.id.setup_name);
         setupButton = findViewById(R.id.setup_button);
         setupProgress = findViewById(R.id.setup_progress);
 
+        user_id = currentUser.getUid();
 
 
-        firebaseFirestore.collection("Users").document(user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        setupProgress.setVisibility(View.VISIBLE);
+        setupButton.setEnabled(false);
+       firebaseFirestore.collection("Users").document(user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @SuppressLint("CheckResult")
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
                 if (task.isSuccessful()){
 
-                    if(task.getResult().exists()){
+                    if(Objects.requireNonNull(task.getResult()).exists()){
 
                         String name = task.getResult().getString("name");
                         String image = task.getResult().getString("image");
 
+                        mainImageUri = Uri.parse(image);
                         setupName.setText(name);
 
                         RequestOptions placeholderRequest = new RequestOptions();
@@ -110,6 +115,8 @@ public class SetupActivity extends AppCompatActivity {
 
                 }
 
+                setupProgress.setVisibility(View.INVISIBLE);
+                setupButton.setEnabled(true);
             }
         });
 
@@ -122,59 +129,33 @@ public class SetupActivity extends AppCompatActivity {
                 final String user_name = setupName.getText().toString();
 
                 if (!TextUtils.isEmpty(user_name) && mainImageUri != null) {
+                setupProgress.setVisibility(View.VISIBLE);
 
-                    setupProgress.setVisibility(View.VISIBLE);
+                if (isChanged) {
 
-                    StorageReference image_path = storageReference.child("profile_images").child(user_id + ".jpg");
-                    image_path.putFile(mainImageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                            if (task.isSuccessful()){
+                        StorageReference image_path = storageReference.child("profile_images").child(user_id + ".jpg");
+                        image_path.putFile(mainImageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                if (task.isSuccessful()) {
 
-                                Uri download_uri;
-
-                                download_uri = task.getResult().getUploadSessionUri();
-
-                                Map<String, String> userMap = new HashMap<>();
-                                userMap.put("name", user_name);
-                                userMap.put("image", download_uri.toString());
-
-                                firebaseFirestore.collection("Users").document(user_id).set(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-
-                                        if(task.isSuccessful()){
-
-                                            Toast.makeText(SetupActivity.this, "The user Settings are updated.", Toast.LENGTH_LONG).show();
-                                            Intent mainIntent = new Intent(SetupActivity.this, MainActivity.class);
-                                            startActivity(mainIntent);
-                                            finish();
-
-                                        } else {
-
-                                            String error = task.getException().getMessage();
-                                            Toast.makeText(SetupActivity.this, "(FIRESTORE Error) : " + error, Toast.LENGTH_LONG).show();
-
-                                        }
-
-                                        setupProgress.setVisibility(View.INVISIBLE);
-
-                                    }
-                                });
+                                    storeFirestore(task, user_name);
 
 
-                            } else {
-                                String error = task.getException().getMessage();
-                                Toast.makeText(SetupActivity.this, "(FIRESTORE Error) : " + error, Toast.LENGTH_LONG).show();
+                                } else {
+                                    String error = task.getException().getMessage();
+                                    Toast.makeText(SetupActivity.this, "(FIRESTORE Error) : " + error, Toast.LENGTH_LONG).show();
 
+                                }
                             }
-                        }
-                    });
+                        });
 
 
-
+                    }else {
+                    storeFirestore(null, user_name);
                 }
 
+                }
             }
 
         });
@@ -215,7 +196,12 @@ public class SetupActivity extends AppCompatActivity {
 
         Uri download_uri;
 
-        download_uri = task.getResult().getUploadSessionUri();
+        if (task != null){
+             download_uri = task.getResult().getUploadSessionUri();
+        }else {
+             download_uri = mainImageUri;
+        }
+
 
         Map<String, String> userMap = new HashMap<>();
         userMap.put("name", user_name);
@@ -243,7 +229,6 @@ public class SetupActivity extends AppCompatActivity {
 
             }
         });
-
 
     }
     private void BringImagePicker() {
