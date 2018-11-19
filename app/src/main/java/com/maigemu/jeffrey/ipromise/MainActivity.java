@@ -78,9 +78,9 @@ public class MainActivity extends AppCompatActivity
             sendToLogin();
 
         }else {
-            current_user_id = mAuth.getCurrentUser().getUid();
+            //current_user_id = mAuth.getCurrentUser().getUid();
 
-            firebaseFirestore.collection("Users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            /*firebaseFirestore.collection("Users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
                 }
-            });
+            });*/
 
 
         }

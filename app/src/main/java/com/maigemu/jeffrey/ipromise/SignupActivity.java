@@ -114,13 +114,10 @@ public class SignupActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                Intent setupIntent = new Intent(SignupActivity.this, SetupActivity.class);
-                                startActivity(setupIntent);
-                                finish();
+                                sendToMain();
                             }else {
                                 progressBar.setVisibility(View.INVISIBLE);
-                                String errorMessage = task.getException().getMessage();
-                                Toast toast = Toast.makeText(getApplicationContext(), "Error:" + errorMessage, Toast.LENGTH_LONG);
+                                Toast toast = Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG);
                                 toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
                                 toast.show();
 

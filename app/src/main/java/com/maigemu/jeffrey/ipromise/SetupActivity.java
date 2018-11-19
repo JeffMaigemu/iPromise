@@ -14,6 +14,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -82,6 +83,7 @@ public class SetupActivity extends AppCompatActivity {
 
         setupProgress.setVisibility(View.VISIBLE);
         setupButton.setEnabled(false);
+
        firebaseFirestore.collection("Users").document(user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @SuppressLint("CheckResult")
             @Override
@@ -102,16 +104,16 @@ public class SetupActivity extends AppCompatActivity {
                         Glide.with(SetupActivity.this).setDefaultRequestOptions(placeholderRequest).load(image).into(setupImage);
 
                     } else {
-                        String error = task.getException().getMessage();
-                        Toast.makeText(SetupActivity.this, "Firestore Retrieve Error:" + error, Toast.LENGTH_LONG).show();
-
+                        Toast toast = Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
+                        toast.show();
 
                     }
                 } else {
 
-                    String error = task.getException().getMessage();
-                    Toast.makeText(SetupActivity.this, "Firestore Retrieve Error:" + error, Toast.LENGTH_LONG).show();
-
+                    Toast toast = Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
+                    toast.show();
 
                 }
 
@@ -143,9 +145,9 @@ public class SetupActivity extends AppCompatActivity {
 
 
                                 } else {
-                                    String error = task.getException().getMessage();
-                                    Toast.makeText(SetupActivity.this, "(FIRESTORE Error) : " + error, Toast.LENGTH_LONG).show();
-
+                                    Toast toast = Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG);
+                                    toast.setGravity(Gravity.TOP | Gravity.CENTER, 0, 80);
+                                    toast.show();
                                 }
                             }
                         });
@@ -168,8 +170,8 @@ public class SetupActivity extends AppCompatActivity {
                 if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.M){
 
                     if (ContextCompat.checkSelfPermission(SetupActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-                        Toast.makeText(SetupActivity.this, "Permission denied", Toast.LENGTH_LONG).show();
-                        ActivityCompat.requestPermissions(SetupActivity.this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+
+                        ActivityCompat.requestPermissions(SetupActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
 
                     } else {
 
